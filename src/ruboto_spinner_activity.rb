@@ -1,31 +1,35 @@
 require 'ruboto/widget'
-require 'ruboto/util/toast'
-
-ruboto_import_widgets :Button, :LinearLayout, :TextView
-
-# http://xkcd.com/378/
+import 'android.widget.ArrayAdapter'
+import 'java.util.Locale'
 
 class RubotoSpinnerActivity
   def on_create(bundle)
     super
-    set_title 'Domo arigato, Mr Ruboto!'
+    set_title 'Ruboto Spinner Sample'
+    self.setContentView(Ruboto::R::layout::activity_main)
 
-    self.content_view =
-        linear_layout :orientation => :vertical do
-          @text_view = text_view :text => 'What hath Matz wrought?', :id => 42, :width => :match_parent,
-                                 :gravity => :center, :text_size => 48.0
-          button :text => 'M-x butterfly', :width => :match_parent, :id => 43, :on_click_listener => proc { butterfly }
-        end
-  rescue
-    puts "Exception creating activity: #{$!}"
-    puts $!.backtrace.join("\n")
+    adapter = ArrayAdapter.new(self, Ruboto::R::layout::simplerow)
+    adapter.add("")
+    Locale.getISOCountries.each do |code|
+      adapter.add(code)
+    end
+
+    spinner = findViewById(Ruboto::R::id::spinner)
+    spinner.setAdapter(adapter)
+    spinner.setPrompt("List of country codes")
+    spinner.setOnItemSelectedListener(ItemSelectedListener.new(self))
   end
+end
 
-  private
-
-  def butterfly
-    @text_view.text = 'What hath Matz wrought!'
-    toast 'Flipped a bit via butterfly'
+class ItemSelectedListener
+  def initialize(activity)
+    @activity = activity
   end
-
+  def onItemSelected(spinner, view, position, id)
+    if position != 0
+      country_name = Locale.new("", spinner.getSelectedItem).getDisplayCountry(Locale::ENGLISH)
+      label = @activity.findViewById(Ruboto::R::id::label)
+      label.text = "Selected country is '#{country_name}'."
+    end
+  end
 end
