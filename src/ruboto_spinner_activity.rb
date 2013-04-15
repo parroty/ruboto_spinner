@@ -1,4 +1,5 @@
 require 'ruboto/widget'
+
 import 'android.widget.ArrayAdapter'
 import 'java.util.Locale'
 
